@@ -33,6 +33,7 @@ function runAfterLoad(){
 async function getWeaponUsage(){
     chrome.runtime.sendMessage({type: 'getWeaponUsage'}, async (response)=>{
         // store it as a global var
+        console.log(response.results);
         displayWeaponUsageRanks(response.results);
         return response;
     });
@@ -47,39 +48,37 @@ function displayWeaponUsageRanks(weaponUsage){
             var weaponId = item.title.toLowerCase().replace(/\n/i,'-').replaceAll(' ','-').replaceAll('.','').replaceAll('_','').replaceAll("'",'').replaceAll(',','').replaceAll('(','').replaceAll(')','').replaceAll('ö','o');
             // weapon display ranks
             try{
-                displayRanks(item, weaponUsage[weaponId].pveRank, weaponUsage[weaponId].pvpRank);
+                displayRanks(item, weaponUsage[weaponId].pveRank, weaponUsage[weaponId].pvpRank, weaponUsage[weaponId].globalRank);
             } catch(err) {
-                console.log(weaponId);
+                console.log(err);
             }
         } 
     })
 }
 
 
-function displayRanks(itemElement, pveRank, pvpRank){
+function displayRanks(itemElement, pveRank, pvpRank, globalRank){
     // https://www.light.gg/Content/Images/pve-icon.png
     // https://www.light.gg/Content/Images/pve-icon.png
     var usageHeader = document.createElement('div');
-    usageHeader.style = "height: 14px; background-color: #ddd;";
+    usageHeader.style = "height: 16px; background-color: #ddd;";
 
-    var pveSpan = document.createElement('span');
-    pveSpan.style = "margin: 1px; color: #041955; font-size: 10px; display: inline-block; *display: inline; align-items: center; font-weight: bold;";
-    var pveIcon = document.createElement('img');
-    pveIcon.src = chrome.extension.getURL('img/pve.png');
-    pveIcon.style = "background-color: #041955; height: 9px";
-    pveSpan.innerText = '#' + pveRank;
-    pveSpan.prepend(pveIcon);
+    var pveDot = document.createElement('div');
+    pveDot.style = 'height: 14px; width: 14px; background-color: #041955; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-25%); font-size: 9px;';
+    pveDot.innerText = pveRank;
+    usageHeader.appendChild(pveDot);
 
-    var pvpSpan = document.createElement('span');
-    pvpSpan.style = "margin: 1px; color: #a31720; font-size: 10px; display: inline-block; *display: inline; align-items: center; font-weight: bold;";
-    var pvpIcon = document.createElement('img');
-    pvpIcon.src = chrome.extension.getURL('img/pvp.png');
-    pvpIcon.style = "background-color: #a31720; height: 9px";
-    pvpSpan.innerText = '#' + pvpRank;
-    pvpSpan.prepend(pvpIcon);
+    var pvpDot = document.createElement('div');
+    pvpDot.style = 'height: 14px; width: 14px; background-color: #a31720; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-25%); font-size: 9px;';
+    pvpDot.innerText = pvpRank;
+    usageHeader.appendChild(pvpDot);
 
-    usageHeader.appendChild(pveSpan);
-    usageHeader.appendChild(pvpSpan);
+    if(globalRank <= 25 && globalRank !== null) {
+        var glbDot = document.createElement('div');
+        glbDot.style = 'height: 14px; width: 14px; background-color: #df8020; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-25%); font-size: 9px;';
+        glbDot.innerText = globalRank;
+        usageHeader.appendChild(glbDot);
+    }
 
     itemElement.parentElement.append(usageHeader);
 }

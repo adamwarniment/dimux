@@ -61,25 +61,67 @@ async function getWeaponUsage(weaponType){
 
 async function getAllWeaponUsage(){
     // prep all promise tasks
-    var promises = [], pve=[], pvp=[];
+    var promises=[], pve=[], pvp=[], globalPve=[], globalPvp=[];
     Object.keys(WEAPON_IDS).forEach(weaponType => {
         var weaponQuery = '&types=' + WEAPON_IDS[weaponType];
-        promises.push($.getJSON('https://api.tracker.gg/api/v1/destiny-2/db/items/insights?sort=usage&modes=7' + weaponQuery, (json)=>{var e=1; json.data.forEach(weapon =>{ weapon.usageRank = e; e++; }); pve = pve.concat(json.data); } ));
-        promises.push($.getJSON('https://api.tracker.gg/api/v1/destiny-2/db/items/insights?sort=usage&modes=69' + weaponQuery, (json)=>{var p=1; json.data.forEach(weapon =>{ weapon.usageRank = p; p++; }); pvp = pvp.concat(json.data); } ))
+        promises.push($.getJSON('https://api.tracker.gg/api/v1/destiny-2/db/items/insights?sort=usage&modes=7' + weaponQuery, (json)=>{ var e=1; json.data.forEach(weapon =>{ weapon.usageRank = e; e++; }); pve = pve.concat(json.data); } ));
+        promises.push($.getJSON('https://api.tracker.gg/api/v1/destiny-2/db/items/insights?sort=usage&modes=69' + weaponQuery, (json)=>{ var p=1; json.data.forEach(weapon =>{ weapon.usageRank = p; p++; }); pvp = pvp.concat(json.data); } ));
+        promises.push($.getJSON('https://api.tracker.gg/api/v1/destiny-2/db/items/insights?sort=usage&modes=7', (json)=>{ globalPve = globalPve.concat(json.data); } ));
+        promises.push($.getJSON('https://api.tracker.gg/api/v1/destiny-2/db/items/insights?sort=usage&modes=69', (json)=>{ globalPvp = globalPvp.concat(json.data); } ));
     })
     // combine all
     return $.when.apply($, promises).then(() => {
+        // remove all duplicates
+        pve = pve.filter((v,i,a)=>a.findIndex(t=>(t.name === v.name))===i)
+        pvp = pvp.filter((v,i,a)=>a.findIndex(t=>(t.name === v.name))===i)
+
         // convert jsons to objs
         var usage = {};
         pve.forEach(weapon => {
             var weaponId = weapon.slug + "-" + weapon.itemType.name.toLowerCase().replaceAll(' ', '-');
-            usage[weaponId] = {name: weapon.name, pveRank: weapon.usageRank, pvpRank: null}; // create the object
+            usage[weaponId] = {name: weapon.name, id: weaponId, pveRank: weapon.usageRank, pvpRank: null, globalRank: null}; // create the object
         });
-        pve.forEach(weapon => {
+        pvp.forEach(weapon => {
             var weaponId = weapon.slug + "-" + weapon.itemType.name.toLowerCase().replaceAll(' ', '-');;
             usage[weaponId].pvpRank = weapon.usageRank; // add the pvp rank
         });
+        // calc the global kill count from both pve and pvp
+        var globalUsage = {};
+        var totalPve = 0, totalPvp = 0;
+        globalPve.forEach(weapon => {
+            try{
+                var weaponId = weapon.slug + "-" + weapon.itemType.name.toLowerCase().replaceAll(' ', '-');
+                globalUsage[weaponId] = {name: weapon.name, id: weaponId, pveKills: weapon.total.kills, pvpKills: null}
+                totalPve = totalPve + weapon.total.kills;
+            } catch(err) {}
+        })
+        globalPvp.forEach(weapon => {
+            try{
+                var weaponId = weapon.slug + "-" + weapon.itemType.name.toLowerCase().replaceAll(' ', '-');
+                globalUsage[weaponId].pvpKills = weapon.total.kills;
+                totalPvp = totalPvp + weapon.total.kills;
+            } catch(err) {}
+        })
+        console.log(globalUsage);
+        // loop all the weapons in usage and calc the combined global usage rank
+        var pvpAdjFactor = totalPve/totalPvp;
+        var globalRankArr = [];
+        Object.keys(globalUsage).forEach(weaponId => {
+            var weapon = globalUsage[weaponId];
+            var totalKills = weapon.pvpKills !== null ? weapon.pveKills + weapon.pvpKills*pvpAdjFactor : weapon.pveKills * 2;
+            globalRankArr.push({id: weapon.id, kills: totalKills})
+        })
+        // sort them by largest to smallest
+        globalRankArr.sort((a,b) => (a.kills < b.kills) ? 1 : -1)
+        // take the array position as global rank
+        var r = 1;
+        globalRankArr.forEach(weapon => {
+            usage[weapon.id].globalRank = r;
+            r++;
+        })
+
         console.log(usage);
+        console.log(globalRankArr);
         return usage;
     });
 }
