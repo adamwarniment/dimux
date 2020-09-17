@@ -64,18 +64,18 @@ function displayRanks(itemElement, pveRank, pvpRank, globalRank){
     usageHeader.style = "height: 16px; background-color: #ddd;";
 
     var pveDot = document.createElement('div');
-    pveDot.style = 'height: 14px; width: 14px; background-color: #041955; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-25%); font-size: 9px;';
+    pveDot.style = 'height: 14px; width: 14px; background-color: #041955; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-15%); font-size: 9px;';
     pveDot.innerText = pveRank;
     usageHeader.appendChild(pveDot);
 
     var pvpDot = document.createElement('div');
-    pvpDot.style = 'height: 14px; width: 14px; background-color: #a31720; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-25%); font-size: 9px;';
+    pvpDot.style = 'height: 14px; width: 14px; background-color: #a31720; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-15%); font-size: 9px;';
     pvpDot.innerText = pvpRank;
     usageHeader.appendChild(pvpDot);
 
     if(globalRank <= 25 && globalRank !== null) {
         var glbDot = document.createElement('div');
-        glbDot.style = 'height: 14px; width: 14px; background-color: #df8020; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-25%); font-size: 9px;';
+        glbDot.style = 'height: 14px; width: 14px; background-color: #df8020; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-15%); font-size: 9px;';
         glbDot.innerText = globalRank;
         usageHeader.appendChild(glbDot);
     }

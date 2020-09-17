@@ -82,8 +82,13 @@ async function getAllWeaponUsage(){
             usage[weaponId] = {name: weapon.name, id: weaponId, pveRank: weapon.usageRank, pvpRank: null, globalRank: null}; // create the object
         });
         pvp.forEach(weapon => {
-            var weaponId = weapon.slug + "-" + weapon.itemType.name.toLowerCase().replaceAll(' ', '-');;
-            usage[weaponId].pvpRank = weapon.usageRank; // add the pvp rank
+            var weaponId = weapon.slug + "-" + weapon.itemType.name.toLowerCase().replaceAll(' ', '-');
+            console.log(weaponId);
+            try{
+                usage[weaponId].pvpRank = weapon.usageRank; // add the pvp rank
+            } catch(err) {
+                usage[weaponId] = {name: weapon.name, id: weaponId, pveRank: null, pvpRank: weapon.usageRank, globalRank: null}; // create the object
+            }
         });
         // calc the global kill count from both pve and pvp
         var globalUsage = {};
@@ -120,8 +125,6 @@ async function getAllWeaponUsage(){
             r++;
         })
 
-        console.log(usage);
-        console.log(globalRankArr);
         return usage;
     });
 }
