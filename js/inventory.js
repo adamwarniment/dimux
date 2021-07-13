@@ -61,7 +61,7 @@ function displayRanks(itemElement, pveRank, pvpRank, globalRank){
     // https://www.light.gg/Content/Images/pve-icon.png
     // https://www.light.gg/Content/Images/pve-icon.png
     var usageHeader = document.createElement('div');
-    usageHeader.style = "height: 16px; background-color: #ddd;";
+    usageHeader.style = "padding-left: 1px; height: 16px; background-color: #ddd;";
 
     var pveDot = document.createElement('div');
     pveDot.style = 'height: 14px; width: 14px; background-color: #041955; border-radius: 25%; display: inline-block; text-align: center; margin: 1px; transform: translateY(-15%); font-size: 9px;';
