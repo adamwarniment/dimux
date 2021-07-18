@@ -80,5 +80,5 @@ function displayRanks(itemElement, pveRank, pvpRank, globalRank){
         usageHeader.appendChild(glbDot);
     }
 
-    itemElement.parentElement.append(usageHeader);
+    itemElement.append(usageHeader);
 }
